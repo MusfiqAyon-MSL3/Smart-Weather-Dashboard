@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>AuraWeather — Smart Weather Matrix & Meteorologic Studio</title>
+    <meta name="description" content="Precision real-time weather analytics, 24-hour hourly timeline, 5-day forecasts, air quality index, and smart meteorologic advisories. Built by Musfiq Ayon.">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+    <!-- Modern Lifecycle Shim: Transparently redirect extension 'unload' listeners to 'pagehide' to eliminate Permissions Policy violations -->
+    <script>
+        (function() {
+            try {
+                var _origAEL = EventTarget.prototype.addEventListener;
+                EventTarget.prototype.addEventListener = function(type, listener, options) {
+                    if (type === 'unload') {
+                        return _origAEL.call(this, 'pagehide', listener, options);
+                    }
+                    return _origAEL.call(this, type, listener, options);
+                };
+                Object.defineProperty(window, 'onunload', {
+                    get: function() { return null; },
+                    set: function(fn) {
+                        if (typeof fn === 'function') {
+                            window.addEventListener('pagehide', fn);
+                        }
+                    },
+                    configurable: true
+                });
+            } catch (e) {}
+        })();
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome 6.5.1 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Top Sticky Header -->
+    <header class="app-header">
+        <div class="header-inner">
+            <!-- Brand Link -->
+            <a href="#" class="brand-link">
+                <div class="brand-symbol">
+                    <i class="fas fa-cloud-bolt"></i>
+                </div>
+                <div class="brand-text-group">
+                    <span class="brand-title">AuraWeather</span>
+                    <span class="brand-tag">STUDIO</span>
+                </div>
+            </a>
+
+            <!-- Header Center: Clock & Date -->
+            <div class="header-clock-box">
+                <div class="live-clock" id="headerTime">12:00:00 PM</div>
+                <div class="live-date" id="headerDate">Monday, Jan 1, 2026</div>
+            </div>
+
+            <!-- Header Right Actions -->
+            <div class="header-right">
+                <!-- Unit Switcher (°C / °F) -->
+                <div class="unit-toggle" id="unitToggle" role="group" aria-label="Temperature Unit">
+                    <button type="button" class="unit-btn active" id="unitCelsius" data-unit="metric">°C</button>
+                    <button type="button" class="unit-btn" id="unitFahrenheit" data-unit="imperial">°F</button>
+                </div>
+
+                <!-- GPS Location Quick Trigger -->
+                <button type="button" class="btn-icon" id="locateBtn" aria-label="Use Current Location" title="Get Current Location Weather">
+                    <i class="fas fa-location-crosshairs"></i>
+                </button>
+
+                <!-- Saved Favorites Button -->
+                <button type="button" class="btn-icon" id="favoritesBtn" aria-label="Favorite Cities" title="Saved Cities">
+                    <i class="fas fa-star"></i>
+                    <span class="badge-count" id="favCountBadge">0</span>
+                </button>
+
+                <!-- Theme Toggle -->
+                <button type="button" class="btn-icon" id="themeToggleBtn" aria-label="Toggle Theme" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+
+                <!-- Settings Button -->
+                <button type="button" class="btn-icon" id="settingsBtn" aria-label="Settings" title="Weather Settings">
+                    <i class="fas fa-gear"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="app-main">
+        <div class="main-content-wrapper">
+
+            <!-- Search & Presets Command Strip -->
+            <section class="search-command-section">
+                <div class="search-bar-wrapper">
+                    <i class="fas fa-magnifying-glass search-prefix-icon"></i>
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        class="search-text-field" 
+                        placeholder="Search city or district..."
+                        autocomplete="off"
+                        spellcheck="false"
+                    >
+                    <button type="button" class="btn-search-icon" id="clearSearchBtn" title="Clear input" style="display: none;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <button type="button" class="btn-primary-search" id="searchSubmitBtn">
+                        <i class="fas fa-arrow-right"></i>
+                        <span>Search</span>
+                    </button>
+
+                    <!-- Autocomplete Suggestions Dropdown -->
+                    <div class="suggestions-popover" id="suggestionsPopover" style="display: none;"></div>
+                </div>
+
+                <!-- Quick Preset / Pinned Cities Scrollable Bar -->
+                <div class="quick-chips-row" id="quickCitiesRow">
+                    <span class="chips-label">Quick:</span>
+                    <button type="button" class="quick-chip active-chip" id="chipGps">
+                        <i class="fas fa-location-arrow"></i> My GPS
+                    </button>
+                    <button type="button" class="quick-chip" data-city="Dhaka">Dhaka</button>
+                    <button type="button" class="quick-chip" data-city="Chattogram">Chattogram</button>
+                    <button type="button" class="quick-chip" data-city="Sylhet">Sylhet</button>
+                    <button type="button" class="quick-chip" data-city="Cox's Bazar">Cox's Bazar</button>
+                    <button type="button" class="quick-chip" data-city="London">London</button>
+                    <button type="button" class="quick-chip" data-city="New York">New York</button>
+                    <button type="button" class="quick-chip" data-city="Tokyo">Tokyo</button>
+                    <button type="button" class="quick-chip btn-add-fav-chip" id="chipPinCurrent" title="Pin current city to favorites">
+                        <i class="fas fa-plus"></i> Pin City
+                    </button>
+                </div>
+            </section>
+
+            <!-- Hero Current Weather Card -->
+            <section class="hero-weather-card" id="heroWeatherCard">
+                <!-- Card Header -->
+                <div class="hero-header-row">
+                    <div class="hero-location-info">
+                        <div class="location-name-group">
+                            <i class="fas fa-location-dot location-pin-icon"></i>
+                            <h1 class="city-title" id="heroCityName">Dhaka, BD</h1>
+                            <button type="button" class="btn-fav-star" id="heroFavToggle" title="Bookmark this city">
+                                <i class="far fa-star"></i>
+                            </button>
+                        </div>
+                        <div class="coordinates-pill" id="heroCoordinates">
+                            23.8103° N, 90.4125° E
+                        </div>
+                    </div>
+
+                    <div class="hero-sync-info">
+                        <div class="sync-text">
+                            <span class="sync-dot"></span>
+                            <span>Updated: <strong id="lastUpdatedText">Just now</strong></span>
+                        </div>
+                        <button type="button" class="btn-refresh-sync" id="refreshWeatherBtn" title="Refresh Live Weather">
+                            <i class="fas fa-rotate"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Card Body: Main Temperature & Sun Position Tracker -->
+                <div class="hero-body-grid">
+                    <!-- Left Column: Primary Metrics -->
+                    <div class="hero-temp-col">
+                        <div class="temp-display-cluster">
+                            <div class="temp-huge-num" id="heroTemperature">26</div>
+                            <div class="temp-unit-symbol" id="heroTempUnit">°C</div>
+                            <div class="weather-visual-icon" id="heroConditionIcon">
+                                <i class="fas fa-cloud-sun"></i>
+                            </div>
+                        </div>
+
+                        <div class="condition-badge-row">
+                            <span class="condition-pill" id="heroConditionBadge">
+                                <i class="fas fa-sun"></i> <span id="heroConditionText">Sunny</span>
+                            </span>
+                            <span class="feels-like-pill">
+                                Feels like: <strong id="heroFeelsLike">28°C</strong>
+                            </span>
+                        </div>
+
+                        <div class="temp-extremes-row">
+                            <span class="extreme-item"><i class="fas fa-arrow-up text-rose"></i> High: <strong id="heroTempMax">29°C</strong></span>
+                            <span class="extreme-dot">•</span>
+                            <span class="extreme-item"><i class="fas fa-arrow-down text-cyan"></i> Low: <strong id="heroTempMin">21°C</strong></span>
+                        </div>
+
+                        <p class="hero-summary-sentence" id="heroConditionSummary">
+                            Mild conditions with moderate humidity. Ideal weather for outdoor routines.
+                        </p>
+                    </div>
+
+                    <!-- Right Column: Daylight & Sun Tracker Widget -->
+                    <div class="hero-sun-col">
+                        <div class="sun-tracker-box">
+                            <div class="sun-tracker-header">
+                                <span class="tracker-title"><i class="fas fa-sun"></i> Daylight &amp; Celestial Cycle</span>
+                                <span class="daylight-length" id="daylightDuration">11h 05m</span>
+                            </div>
+
+                            <!-- Arch Graphic / Progress Bar -->
+                            <div class="sun-progress-track">
+                                <div class="sun-progress-fill" id="sunProgressFill" style="width: 65%;"></div>
+                                <div class="sun-marker" id="sunMarker" style="left: 65%;">
+                                    <i class="fas fa-sun"></i>
+                                </div>
+                            </div>
+
+                            <!-- Times Row -->
+                            <div class="sun-times-row">
+                                <div class="sun-event">
+                                    <i class="fas fa-sunrise"></i>
+                                    <div>
+                                        <div class="event-label">Sunrise</div>
+                                        <div class="event-time" id="sunriseTime">06:06 AM</div>
+                                    </div>
+                                </div>
+                                <div class="sun-event text-right">
+                                    <i class="fas fa-sunset"></i>
+                                    <div>
+                                        <div class="event-label">Sunset</div>
+                                        <div class="event-time" id="sunsetTime">05:13 PM</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="daylight-subtext" id="daylightSubtext">
+                                <i class="fas fa-clock"></i> Sunset in approximately 2 hours
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dynamic Smart Weather Advisory Banner -->
+            <section class="advisory-banner" id="smartAdvisoryBanner">
+                <div class="advisory-icon-ring" id="advisoryIconRing">
+                    <i class="fas fa-wand-magic-sparkles"></i>
+                </div>
+                <div class="advisory-content">
+                    <div class="advisory-heading" id="advisoryHeading">Smart Weather Advisory</div>
+                    <div class="advisory-text" id="advisoryText">
+                        Comfortable atmospheric conditions. Air quality is fair. Good day for commuting and outdoor activities.
+                    </div>
+                </div>
+            </section>
+
+            <!-- 24-Hour Hourly Forecast Slider -->
+            <section class="hourly-forecast-section">
+                <div class="section-title-row">
+                    <div class="title-with-badge">
+                        <h2><i class="fas fa-clock-rotate-left"></i> Hourly Forecast</h2>
+                        <span class="sub-badge">Next 24 Hours</span>
+                    </div>
+                    <div class="timeline-scroll-controls">
+                        <button type="button" class="btn-scroll-arrow" id="hourlyScrollLeft" aria-label="Scroll left"><i class="fas fa-chevron-left"></i></button>
+                        <button type="button" class="btn-scroll-arrow" id="hourlyScrollRight" aria-label="Scroll right"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+
+                <div class="hourly-timeline-slider" id="hourlyTimeline">
+                    <!-- Hourly items dynamically injected by JS -->
+                </div>
+            </section>
+
+            <!-- Meteorological Metrics Grid (6 Advanced Cards) -->
+            <section class="metrics-dashboard-section">
+                <div class="section-title-row">
+                    <h2><i class="fas fa-gauge-high"></i> Atmospheric Conditions</h2>
+                    <span class="metrics-timestamp">Real-time sensor telemetry</span>
+                </div>
+
+                <div class="metrics-grid">
+                    <!-- Card 1: Humidity -->
+                    <div class="metric-card">
+                        <div class="metric-top">
+                            <span class="metric-label"><i class="fas fa-droplet text-cyan"></i> Humidity</span>
+                            <span class="metric-status" id="humidityStatus">Normal</span>
+                        </div>
+                        <div class="metric-main-value">
+                            <span class="value-number" id="metricHumidity">73</span>
+                            <span class="value-unit">%</span>
+                        </div>
+                        <div class="metric-bar-track">
+                            <div class="metric-bar-fill cyan-fill" id="humidityBar" style="width: 73%;"></div>
+                        </div>
+                        <div class="metric-footer-sub">
+                            Dew point: <strong id="metricDewPoint">19°C</strong>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Wind & Direction -->
+                    <div class="metric-card">
+                        <div class="metric-top">
+                            <span class="metric-label"><i class="fas fa-wind text-rose"></i> Wind &amp; Gusts</span>
+                            <span class="metric-status" id="windStatus">Gentle</span>
+                        </div>
+                        <div class="metric-main-value">
+                            <span class="value-number" id="metricWindSpeed">3.7</span>
+                            <span class="value-unit" id="windSpeedUnit">km/h</span>
+                        </div>
+                        <div class="wind-direction-row">
+                            <i class="fas fa-location-arrow wind-compass-needle" id="windCompassNeedle" style="transform: rotate(260deg);"></i>
+                            <span id="windDirectionLabel">260° WSW</span>
+                            <span class="sub-sep">•</span>
+                            <span>Gusts: <strong id="metricWindGust">5.2 km/h</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Air Quality Index (AQI) -->
+                    <div class="metric-card">
+                        <div class="metric-top">
+                            <span class="metric-label"><i class="fas fa-leaf text-emerald"></i> Air Quality (AQI)</span>
+                            <span class="aqi-level-badge" id="aqiLevelBadge">Moderate</span>
+                        </div>
+                        <div class="metric-main-value">
+                            <span class="value-number" id="metricAqiValue">3</span>
+                            <span class="value-unit">/ 5</span>
+                        </div>
+                        <div class="metric-bar-track">
+                            <div class="metric-bar-fill aqi-fill" id="aqiBar" style="width: 60%;"></div>
+                        </div>
+                        <div class="metric-footer-sub" id="aqiParticlesRow">
+                            PM2.5: <strong id="metricPm25">38.2 µg/m³</strong> • PM10: <strong id="metricPm10">64.5</strong>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Atmospheric Pressure -->
+                    <div class="metric-card">
+                        <div class="metric-top">
+                            <span class="metric-label"><i class="fas fa-compass text-amber"></i> Pressure</span>
+                            <span class="metric-status" id="pressureStatus">Steady</span>
+                        </div>
+                        <div class="metric-main-value">
+                            <span class="value-number" id="metricPressure">1012</span>
+                            <span class="value-unit">hPa</span>
+                        </div>
+                        <div class="metric-bar-track">
+                            <div class="metric-bar-fill amber-fill" id="pressureBar" style="width: 50%;"></div>
+                        </div>
+                        <div class="metric-footer-sub">
+                            Standard baseline: 1013.25 hPa
+                        </div>
+                    </div>
+
+                    <!-- Card 5: Visibility -->
+                    <div class="metric-card">
+                        <div class="metric-top">
+                            <span class="metric-label"><i class="fas fa-eye text-violet"></i> Visibility</span>
+                            <span class="metric-status" id="visibilityStatus">Moderate</span>
+                        </div>
+                        <div class="metric-main-value">
+                            <span class="value-number" id="metricVisibility">2.0</span>
+                            <span class="value-unit" id="visibilityUnit">km</span>
+                        </div>
+                        <div class="metric-bar-track">
+                            <div class="metric-bar-fill violet-fill" id="visibilityBar" style="width: 20%;"></div>
+                        </div>
+                        <div class="metric-footer-sub" id="visibilitySub">
+                            Haze reducing distant horizon
+                        </div>
+                    </div>
+
+                    <!-- Card 6: Cloud Cover & UV Index -->
+                    <div class="metric-card">
+                        <div class="metric-top">
+                            <span class="metric-label"><i class="fas fa-cloud text-blue"></i> Cloud Cover</span>
+                            <span class="metric-status" id="cloudStatus">Partly Cloudy</span>
+                        </div>
+                        <div class="metric-main-value">
+                            <span class="value-number" id="metricCloudCover">40</span>
+                            <span class="value-unit">%</span>
+                        </div>
+                        <div class="metric-bar-track">
+                            <div class="metric-bar-fill blue-fill" id="cloudCoverBar" style="width: 40%;"></div>
+                        </div>
+                        <div class="metric-footer-sub">
+                            Estimated UV: <strong id="metricUvIndex">Low (2/10)</strong>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5-Day Extended Daily Forecast -->
+            <section class="daily-forecast-section">
+                <div class="section-title-row">
+                    <h2><i class="fas fa-calendar-days"></i> 5-Day Weather Outlook</h2>
+                    <span class="metrics-timestamp">Daily synoptic forecast</span>
+                </div>
+
+                <div class="daily-forecast-grid" id="dailyForecastGrid">
+                    <!-- Daily Cards dynamically populated -->
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- =========================================================================
+         BOTTOM SHEET MODALS & DRAWERS
+         ========================================================================= -->
+
+    <!-- Saved Favorites Drawer Modal -->
+    <div class="modal-backdrop" id="favoritesBackdrop">
+        <div class="modal-sheet favorites-sheet">
+            <button type="button" class="btn-close-modal" id="closeFavoritesBtn" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="sheet-header">
+                <div class="sheet-icon-box"><i class="fas fa-star"></i></div>
+                <h3>Pinned Favorite Cities</h3>
+                <p>Quickly jump between your bookmarked locations</p>
+            </div>
+
+            <div class="fav-actions-bar">
+                <button type="button" class="btn-add-current-fav" id="addCurrentToFavsBtn">
+                    <i class="fas fa-plus"></i> Pin Current City (<span id="currentCityPinLabel">Dhaka</span>)
+                </button>
+            </div>
+
+            <div class="favorites-list-wrapper" id="favoritesList">
+                <!-- Dynamically populated favorite items -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Weather Settings Modal -->
+    <div class="modal-backdrop" id="settingsBackdrop">
+        <div class="modal-sheet settings-sheet">
+            <button type="button" class="btn-close-modal" id="closeSettingsBtn" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="sheet-header">
+                <div class="sheet-icon-box"><i class="fas fa-sliders"></i></div>
+                <h3>Weather Studio Settings</h3>
+                <p>Personalize your units, default location, and notifications</p>
+            </div>
+
+            <div class="settings-body">
+                <!-- Setting 1: User Name -->
+                <div class="setting-row">
+                    <div class="setting-meta">
+                        <label for="settingUserName" class="setting-title">Your Name</label>
+                        <p class="setting-desc">Personalizes greetings on the dashboard</p>
+                    </div>
+                    <input type="text" id="settingUserName" class="setting-input" placeholder="e.g. Musfiq Ayon">
+                </div>
+
+                <!-- Setting 2: Default City -->
+                <div class="setting-row">
+                    <div class="setting-meta">
+                        <label for="settingDefaultCity" class="setting-title">Default Startup City</label>
+                        <p class="setting-desc">Loads automatically when GPS is unavailable</p>
+                    </div>
+                    <input type="text" id="settingDefaultCity" class="setting-input" placeholder="e.g. Dhaka">
+                </div>
+
+                <!-- Setting 3: Unit Preference -->
+                <div class="setting-row">
+                    <div class="setting-meta">
+                        <span class="setting-title">Default Units</span>
+                        <p class="setting-desc">Metric (°C, km/h) or Imperial (°F, mph)</p>
+                    </div>
+                    <select id="settingUnitsChoice" class="setting-select">
+                        <option value="metric">Metric (°C, km/h)</option>
+                        <option value="imperial">Imperial (°F, mph)</option>
+                    </select>
+                </div>
+
+                <!-- Setting 4: Periodic Notification Updates -->
+                <div class="setting-row">
+                    <div class="setting-meta">
+                        <span class="setting-title">Background Weather Alerts</span>
+                        <p class="setting-desc">Browser notifications for significant changes</p>
+                    </div>
+                    <select id="settingNotifyInterval" class="setting-select">
+                        <option value="0">Disabled</option>
+                        <option value="30">Every 30 Minutes</option>
+                        <option value="60">Every 1 Hour</option>
+                        <option value="120">Every 2 Hours</option>
+                        <option value="180">Every 3 Hours</option>
+                    </select>
+                </div>
+
+                <div class="settings-actions-footer">
+                    <button type="button" class="btn-save-settings" id="saveSettingsBtn">
+                        <i class="fas fa-check"></i> Save Preferences
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Hub -->
+    <div class="toast-hub" id="toastHub" aria-live="polite"></div>
+
+    <!-- Site Footer -->
+    <footer class="app-footer">
+        <div class="footer-inner">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <div class="brand-symbol sm"><i class="fas fa-cloud-bolt"></i></div>
+                    <span class="footer-title">AuraWeather Studio</span>
+                </div>
+                <p class="footer-description">
+                    High-precision meteorological dashboard powered by OpenWeatherMap API telemetry.
+                </p>
+                <div class="footer-socials">
+                    <a href="https://github.com/MusfiqAyon-MSL3" target="_blank" rel="noopener noreferrer" class="social-btn" title="GitHub"><i class="fab fa-github"></i></a>
+                    <a href="https://linkedin.com/in/musfiq-ayon" target="_blank" rel="noopener noreferrer" class="social-btn" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="https://x.com/musfiqayon10" target="_blank" rel="noopener noreferrer" class="social-btn" title="Twitter/X"><i class="fab fa-twitter"></i></a>
+                    <a href="https://www.facebook.com/musfiq.ayon.10" target="_blank" rel="noopener noreferrer" class="social-btn" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <span>&copy; 2026 AuraWeather by Musfiq Ayon. Open-Source under MIT License.</span>
+                <span>Data provided by OpenWeatherMap • 100% Client-Side Real-Time Telemetry</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- App JavaScript -->
+    <script src="script.js"></script>
+</body>
+
+</html>

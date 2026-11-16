@@ -1,0 +1,1798 @@
+/* =============================================================================
+   AuraWeather Studio — Precision Meteorologic & Weather Matrix Suite
+   Engineered by Musfiq Ayon (Full-Stack Developer & UI/UX Specialist)
+   ============================================================================= */
+
+/* --------------------------------------------------------------------------
+   1. DESIGN TOKENS & COLOR PALETTES
+   -------------------------------------------------------------------------- */
+:root {
+    /* Obsidian Wine Red Theme (Default Dark) */
+    --bg-base: #0A0608;
+    --bg-surface: #120A0F;
+    --bg-card: #180D14;
+    --bg-card-hover: #22131D;
+    --bg-input: #0F070C;
+
+    --border: rgba(225, 29, 72, 0.16);
+    --border-subtle: rgba(255, 255, 255, 0.07);
+    --border-hover: rgba(225, 29, 72, 0.35);
+    --border-focus: #E11D48;
+
+    --primary: #E11D48;
+    --primary-hover: #BE123C;
+    --primary-light: rgba(225, 29, 72, 0.12);
+    --primary-glow: 0 0 24px rgba(225, 29, 72, 0.28);
+
+    --accent-rose: #FB7185;
+    --accent-emerald: #10B981;
+    --accent-emerald-light: rgba(16, 185, 129, 0.14);
+    --accent-cyan: #06B6D4;
+    --accent-cyan-light: rgba(6, 182, 212, 0.14);
+    --accent-amber: #F59E0B;
+    --accent-amber-light: rgba(245, 158, 11, 0.14);
+    --accent-violet: #8B5CF6;
+    --accent-violet-light: rgba(139, 92, 246, 0.14);
+    --accent-blue: #3B82F6;
+    --accent-blue-light: rgba(59, 130, 246, 0.14);
+
+    --text-primary: #F8FAFC;
+    --text-secondary: #A18890;
+    --text-muted: #6E555C;
+
+    --gradient: linear-gradient(135deg, #E11D48 0%, #BE123C 100%);
+    --gradient-glow: linear-gradient(135deg, rgba(225, 29, 72, 0.15) 0%, rgba(190, 18, 60, 0.02) 100%);
+
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-full: 9999px;
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 4px 18px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 14px 34px rgba(0, 0, 0, 0.65);
+
+    --transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="light"] {
+    /* Clean Frost Slate Light Theme */
+    --bg-base: #F8FAFC;
+    --bg-surface: #FFFFFF;
+    --bg-card: #FFFFFF;
+    --bg-card-hover: #F1F5F9;
+    --bg-input: #F8FAFC;
+
+    --border: #E2E8F0;
+    --border-subtle: #EDF2F7;
+    --border-hover: #CBD5E1;
+    --border-focus: #E11D48;
+
+    --primary: #E11D48;
+    --primary-hover: #BE123C;
+    --primary-light: rgba(225, 29, 72, 0.08);
+    --primary-glow: 0 0 18px rgba(225, 29, 72, 0.18);
+
+    --accent-rose: #E11D48;
+    --accent-emerald: #059669;
+    --accent-emerald-light: rgba(5, 150, 105, 0.1);
+    --accent-cyan: #0284C7;
+    --accent-cyan-light: rgba(2, 132, 199, 0.1);
+    --accent-amber: #D97706;
+    --accent-amber-light: rgba(217, 119, 6, 0.1);
+    --accent-violet: #7C3AED;
+    --accent-violet-light: rgba(124, 58, 237, 0.1);
+    --accent-blue: #2563EB;
+    --accent-blue-light: rgba(37, 99, 235, 0.1);
+
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #94A3B8;
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.08);
+}
+
+/* --------------------------------------------------------------------------
+   2. GLOBAL RESET & BASE
+   -------------------------------------------------------------------------- */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+button, a, input, select {
+    touch-action: manipulation;
+}
+
+html {
+    scroll-behavior: smooth;
+    overflow-x: clip;
+    scroll-padding-top: 80px;
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    line-height: 1.5;
+    overflow-x: clip;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    background: none;
+}
+
+input, select, textarea {
+    font-family: inherit;
+}
+
+.text-rose { color: var(--accent-rose); }
+.text-cyan { color: var(--accent-cyan); }
+.text-emerald { color: var(--accent-emerald); }
+.text-amber { color: var(--accent-amber); }
+.text-violet { color: var(--accent-violet); }
+.text-blue { color: var(--accent-blue); }
+
+/* --------------------------------------------------------------------------
+   3. STICKY TOP NAVIGATION
+   -------------------------------------------------------------------------- */
+.app-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10, 6, 8, 0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    transition: var(--transition);
+}
+
+[data-theme="light"] .app-header {
+    background: rgba(255, 255, 255, 0.92);
+}
+
+.header-inner {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.brand-link {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-shrink: 0;
+}
+
+.brand-symbol {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    background: var(--gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.05rem;
+    box-shadow: var(--primary-glow);
+}
+
+.brand-symbol.sm {
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+}
+
+.brand-text-group {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.brand-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+}
+
+.brand-tag {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    padding: 0.15rem 0.45rem;
+    border-radius: var(--radius-sm);
+    background: var(--primary-light);
+    color: var(--accent-rose);
+    border: 1px solid rgba(225, 29, 72, 0.25);
+}
+
+.header-clock-box {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.live-clock {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+
+.live-date {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    flex-shrink: 0;
+}
+
+/* Unit Toggle */
+.unit-toggle {
+    display: inline-flex;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 2px;
+}
+
+.unit-btn {
+    padding: 0.25rem 0.55rem;
+    font-size: 0.76rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    border-radius: 6px;
+    transition: var(--transition);
+}
+
+.unit-btn.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 0 10px rgba(225, 29, 72, 0.4);
+}
+
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.88rem;
+    position: relative;
+    transition: var(--transition);
+}
+
+.btn-icon:hover {
+    color: var(--text-primary);
+    background: var(--bg-card-hover);
+    border-color: var(--border-hover);
+}
+
+.btn-icon:active {
+    transform: scale(0.95);
+}
+
+.badge-count {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--primary);
+    color: white;
+    font-size: 0.62rem;
+    font-weight: 800;
+    padding: 0.08rem 0.35rem;
+    border-radius: var(--radius-full);
+}
+
+/* --------------------------------------------------------------------------
+   4. APP MAIN CONTAINER
+   -------------------------------------------------------------------------- */
+.app-main {
+    flex: 1;
+    padding: 1.5rem 1.25rem 4rem;
+}
+
+.main-content-wrapper {
+    max-width: 1160px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   5. SEARCH COMMAND BAR & PRESET CHIPS
+   -------------------------------------------------------------------------- */
+.search-command-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.search-bar-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 0.35rem 0.5rem 0.35rem 1rem;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+.search-bar-wrapper:focus-within {
+    border-color: var(--primary);
+    box-shadow: var(--primary-glow);
+}
+
+.search-prefix-icon {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-right: 0.65rem;
+}
+
+.search-text-field {
+    flex: 1;
+    height: 40px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    outline: none;
+}
+
+.btn-search-icon {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    padding: 0.4rem;
+    margin-right: 0.4rem;
+    transition: var(--transition);
+}
+
+.btn-search-icon:hover {
+    color: var(--primary);
+}
+
+.btn-primary-search {
+    height: 38px;
+    padding: 0 1.15rem;
+    background: var(--gradient);
+    color: white;
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    box-shadow: var(--primary-glow);
+    transition: var(--transition);
+}
+
+.btn-primary-search:hover {
+    filter: brightness(1.1);
+}
+
+.btn-primary-search:active {
+    transform: scale(0.97);
+}
+
+/* Suggestions Popover */
+.suggestions-popover {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    max-height: 260px;
+    overflow-y: auto;
+    z-index: 80;
+    padding: 0.35rem;
+}
+
+.suggestion-item {
+    padding: 0.55rem 0.85rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.84rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.suggestion-item:hover, .suggestion-item.selected {
+    background: var(--bg-card);
+    color: var(--text-primary);
+}
+
+.suggestion-item i {
+    color: var(--primary);
+    font-size: 0.8rem;
+}
+
+/* Quick Pinned Cities Scrollable Row */
+.quick-chips-row {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.15rem 0;
+}
+
+.quick-chips-row::-webkit-scrollbar {
+    display: none;
+}
+
+.chips-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-right: 0.2rem;
+    flex-shrink: 0;
+}
+
+.quick-chip {
+    padding: 0.32rem 0.75rem;
+    border-radius: var(--radius-full);
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 0.76rem;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: var(--transition);
+}
+
+.quick-chip:hover {
+    color: var(--text-primary);
+    border-color: var(--border-hover);
+}
+
+.quick-chip.active-chip {
+    background: var(--primary-light);
+    color: var(--accent-rose);
+    border-color: rgba(225, 29, 72, 0.4);
+}
+
+.btn-add-fav-chip {
+    border-style: dashed;
+    color: var(--primary);
+}
+
+/* --------------------------------------------------------------------------
+   6. HERO WEATHER CARD
+   -------------------------------------------------------------------------- */
+.hero-weather-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-weather-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient);
+}
+
+.hero-header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.hero-location-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.location-name-group {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.location-pin-icon {
+    font-size: 1.25rem;
+    color: var(--primary);
+}
+
+.city-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+}
+
+.btn-fav-star {
+    font-size: 1.15rem;
+    color: var(--text-muted);
+    padding: 0.2rem;
+    transition: var(--transition);
+}
+
+.btn-fav-star:hover, .btn-fav-star.active {
+    color: #F59E0B;
+}
+
+.coordinates-pill {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--text-muted);
+}
+
+.hero-sync-info {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.sync-text {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.sync-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: var(--radius-full);
+    background: var(--accent-emerald);
+    box-shadow: 0 0 8px var(--accent-emerald);
+}
+
+.btn-refresh-sync {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    transition: var(--transition);
+}
+
+.btn-refresh-sync:hover {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-refresh-sync.spinning i {
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Hero Body Grid: Temperature vs Sun Tracker */
+.hero-body-grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.temp-display-cluster {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.temp-huge-num {
+    font-family: var(--font-mono);
+    font-size: 4.8rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    color: var(--text-primary);
+}
+
+.temp-unit-symbol {
+    font-family: var(--font-mono);
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin-right: 0.85rem;
+}
+
+.weather-visual-icon {
+    font-size: 3.2rem;
+    color: var(--accent-rose);
+    filter: drop-shadow(0 0 16px rgba(225, 29, 72, 0.4));
+    margin-left: 0.5rem;
+}
+
+.condition-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 0.65rem;
+    flex-wrap: wrap;
+}
+
+.condition-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: var(--radius-full);
+    background: var(--primary-light);
+    color: var(--accent-rose);
+    border: 1px solid rgba(225, 29, 72, 0.3);
+    font-size: 0.84rem;
+    font-weight: 700;
+}
+
+.feels-like-pill {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.feels-like-pill strong {
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+}
+
+.temp-extremes-row {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.temp-extremes-row strong {
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+}
+
+.extreme-dot {
+    color: var(--text-muted);
+}
+
+.hero-summary-sentence {
+    font-size: 0.84rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    max-width: 480px;
+}
+
+/* Sun Tracker Widget */
+.sun-tracker-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.15rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.sun-tracker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.78rem;
+}
+
+.tracker-title {
+    font-weight: 700;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.daylight-length {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--accent-amber);
+    background: var(--accent-amber-light);
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-full);
+}
+
+.sun-progress-track {
+    position: relative;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    overflow: visible;
+}
+
+.sun-progress-fill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    background: linear-gradient(90deg, #F59E0B, #E11D48);
+    transition: width 0.5s ease;
+}
+
+.sun-marker {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-full);
+    background: #F59E0B;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    box-shadow: 0 0 10px #F59E0B;
+    transition: left 0.5s ease;
+}
+
+.sun-times-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sun-event {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sun-event i {
+    font-size: 1.15rem;
+    color: var(--accent-amber);
+}
+
+.event-label {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.event-time {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.text-right {
+    text-align: right;
+    flex-direction: row-reverse;
+}
+
+.daylight-subtext {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding-top: 0.4rem;
+    border-top: 1px solid var(--border-subtle);
+}
+
+/* --------------------------------------------------------------------------
+   7. SMART WEATHER ADVISORY BANNER
+   -------------------------------------------------------------------------- */
+.advisory-banner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--primary);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.advisory-icon-ring {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    background: var(--primary-light);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+}
+
+.advisory-heading {
+    font-size: 0.86rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.15rem;
+}
+
+.advisory-text {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+}
+
+/* --------------------------------------------------------------------------
+   8. SECTION TITLES & SCROLL CONTROLS
+   -------------------------------------------------------------------------- */
+.section-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.85rem;
+}
+
+.section-title-row h2 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-title-row h2 i {
+    color: var(--primary);
+}
+
+.title-with-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.sub-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--accent-rose);
+    background: var(--primary-light);
+    padding: 0.12rem 0.45rem;
+    border-radius: var(--radius-sm);
+}
+
+.metrics-timestamp {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.timeline-scroll-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.btn-scroll-arrow {
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    transition: var(--transition);
+}
+
+.btn-scroll-arrow:hover {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+/* --------------------------------------------------------------------------
+   9. HOURLY FORECAST TIMELINE SLIDER
+   -------------------------------------------------------------------------- */
+.hourly-timeline-slider {
+    display: flex;
+    gap: 0.65rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.25rem 0.1rem;
+    scroll-behavior: smooth;
+}
+
+.hourly-timeline-slider::-webkit-scrollbar {
+    display: none;
+}
+
+.hourly-card {
+    flex: 0 0 115px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 0.85rem 0.65rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.45rem;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+.hourly-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    background: var(--bg-card-hover);
+}
+
+.hourly-time {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.hourly-icon {
+    font-size: 1.5rem;
+    color: var(--accent-rose);
+    margin: 0.15rem 0;
+}
+
+.hourly-temp {
+    font-family: var(--font-mono);
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.hourly-rain {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--accent-cyan);
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+.hourly-wind {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   10. METEOROLOGICAL METRICS GRID (6 CARDS)
+   -------------------------------------------------------------------------- */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.metric-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.15rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+.metric-card:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+}
+
+.metric-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.78rem;
+}
+
+.metric-label {
+    font-weight: 700;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.metric-status {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.metric-main-value {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+}
+
+.value-number {
+    font-family: var(--font-mono);
+    font-size: 2.1rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--text-primary);
+}
+
+.value-unit {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.metric-bar-track {
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    overflow: hidden;
+}
+
+.metric-bar-fill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    transition: width 0.5s ease;
+}
+
+.cyan-fill { background: var(--accent-cyan); }
+.amber-fill { background: var(--accent-amber); }
+.violet-fill { background: var(--accent-violet); }
+.blue-fill { background: var(--accent-blue); }
+.aqi-fill { background: var(--accent-emerald); }
+
+.aqi-level-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.12rem 0.5rem;
+    border-radius: var(--radius-full);
+    background: var(--accent-emerald-light);
+    color: var(--accent-emerald);
+}
+
+.aqi-level-badge.moderate { background: var(--accent-amber-light); color: var(--accent-amber); }
+.aqi-level-badge.poor { background: rgba(239, 68, 68, 0.15); color: #EF4444; }
+
+.wind-direction-row {
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.wind-compass-needle {
+    color: var(--primary);
+    font-size: 0.85rem;
+    transition: transform 0.5s ease;
+}
+
+.sub-sep {
+    color: var(--text-muted);
+}
+
+.metric-footer-sub {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.metric-footer-sub strong {
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+}
+
+/* --------------------------------------------------------------------------
+   11. 5-DAY EXTENDED DAILY FORECAST
+   -------------------------------------------------------------------------- */
+.daily-forecast-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.85rem;
+}
+
+.daily-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1rem 0.75rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+.daily-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.daily-day-name {
+    font-weight: 800;
+    font-size: 0.84rem;
+    color: var(--text-primary);
+}
+
+.daily-date-sub {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+}
+
+.daily-icon {
+    font-size: 2rem;
+    color: var(--accent-rose);
+    margin: 0.2rem 0;
+}
+
+.daily-condition-name {
+    font-size: 0.74rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    height: 18px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.daily-temp-range {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    font-family: var(--font-mono);
+}
+
+.daily-high {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.daily-low {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.daily-humidity-rain {
+    font-size: 0.68rem;
+    color: var(--accent-cyan);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.15rem;
+}
+
+/* --------------------------------------------------------------------------
+   12. MODALS & BOTTOM SHEETS
+   -------------------------------------------------------------------------- */
+.modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.modal-backdrop.active {
+    display: flex;
+}
+
+.modal-sheet {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+    width: 100%;
+    max-width: 440px;
+    padding: 1.75rem;
+}
+
+.btn-close-modal {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.btn-close-modal:hover {
+    color: var(--text-primary);
+    background: var(--bg-card);
+}
+
+.sheet-header {
+    text-align: center;
+    margin-bottom: 1.25rem;
+}
+
+.sheet-icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-full);
+    background: var(--primary-light);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    margin: 0 auto 0.65rem;
+}
+
+.sheet-header h3 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+}
+
+.sheet-header p {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+/* Favorites Modal List */
+.fav-actions-bar {
+    margin-bottom: 1rem;
+}
+
+.btn-add-current-fav {
+    width: 100%;
+    padding: 0.65rem;
+    border-radius: var(--radius-sm);
+    background: var(--primary-light);
+    color: var(--primary);
+    border: 1px solid rgba(225, 29, 72, 0.3);
+    font-size: 0.82rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    transition: var(--transition);
+}
+
+.btn-add-current-fav:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.favorites-list-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.fav-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 0.85rem;
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    transition: var(--transition);
+}
+
+.fav-item-row:hover {
+    border-color: var(--border-hover);
+    background: var(--bg-card-hover);
+}
+
+.fav-item-left {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    cursor: pointer;
+    flex: 1;
+}
+
+.fav-city-name {
+    font-weight: 700;
+    font-size: 0.86rem;
+}
+
+.btn-del-fav {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.btn-del-fav:hover {
+    color: #EF4444;
+    background: rgba(239, 68, 68, 0.12);
+}
+
+/* Settings Modal Body */
+.settings-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.setting-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.setting-title {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.setting-desc {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.setting-input, .setting-select {
+    width: 100%;
+    height: 40px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 0.84rem;
+    padding: 0 0.75rem;
+    outline: none;
+    transition: var(--transition);
+}
+
+.setting-input:focus, .setting-select:focus {
+    border-color: var(--primary);
+}
+
+.settings-actions-footer {
+    margin-top: 0.5rem;
+}
+
+.btn-save-settings {
+    width: 100%;
+    height: 42px;
+    background: var(--gradient);
+    color: white;
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    box-shadow: var(--primary-glow);
+    transition: var(--transition);
+}
+
+.btn-save-settings:hover {
+    filter: brightness(1.1);
+}
+
+/* --------------------------------------------------------------------------
+   13. TOAST NOTIFICATION HUB
+   -------------------------------------------------------------------------- */
+.toast-hub {
+    position: fixed;
+    top: calc(1rem + env(safe-area-inset-top, 0px));
+    right: 1rem;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    pointer-events: none;
+    max-width: 330px;
+    width: 100%;
+}
+
+.app-toast {
+    pointer-events: auto;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-left: 3.5px solid var(--primary);
+    border-radius: var(--radius-sm);
+    padding: 0.65rem 0.85rem;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    animation: toastPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.app-toast.toast-success { border-left-color: var(--accent-emerald); }
+.app-toast.toast-error { border-left-color: #EF4444; }
+
+.toast-sym {
+    font-size: 1rem;
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.app-toast.toast-success .toast-sym { color: var(--accent-emerald); }
+.app-toast.toast-error .toast-sym { color: #EF4444; }
+
+.toast-msg-box {
+    flex: 1;
+    min-width: 0;
+}
+
+.toast-main-msg {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.toast-sub-msg {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+@keyframes toastPop {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --------------------------------------------------------------------------
+   14. SITE FOOTER
+   -------------------------------------------------------------------------- */
+.app-footer {
+    border-top: 1px solid var(--border-subtle);
+    background: var(--bg-surface);
+    padding: 2.5rem 1.25rem 2rem;
+    margin-top: auto;
+}
+
+.footer-inner {
+    max-width: 1160px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.footer-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.footer-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.footer-description {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    max-width: 440px;
+}
+
+.footer-socials {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.social-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    transition: var(--transition);
+}
+
+.social-btn:hover {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.footer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-subtle);
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   15. MOBILE-FIRST RESPONSIVE PERFECTION
+   -------------------------------------------------------------------------- */
+@media (max-width: 992px) {
+    .hero-body-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .daily-forecast-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .header-clock-box {
+        display: none; /* Hide center clock on small tablets & mobile to give full space to brand & actions */
+    }
+
+    .header-inner {
+        padding: 0.65rem 1rem;
+    }
+
+    .daily-forecast-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 580px) {
+    .app-main {
+        padding: 1rem 0.75rem calc(3rem + env(safe-area-inset-bottom, 16px));
+    }
+
+    /* Search Bar Responsive Optimization */
+    .search-bar-wrapper {
+        padding: 0.3rem 0.4rem 0.3rem 0.75rem;
+    }
+
+    .search-prefix-icon {
+        margin-right: 0.5rem;
+        font-size: 0.88rem;
+    }
+
+    /* Prevent iOS auto-zoom */
+    .search-text-field, .setting-input, .setting-select {
+        font-size: 16px !important;
+    }
+
+    .city-title {
+        font-size: 1.45rem;
+    }
+
+    .temp-huge-num {
+        font-size: 3.8rem;
+    }
+
+    .temp-unit-symbol {
+        font-size: 1.5rem;
+    }
+
+    .weather-visual-icon {
+        font-size: 2.5rem;
+    }
+
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .daily-forecast-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Mobile Bottom Sheet Modals */
+    .modal-backdrop {
+        align-items: flex-end !important;
+        padding: 0 !important;
+    }
+
+    .modal-sheet {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 20px 20px 0 0 !important;
+        border-bottom: none !important;
+        border-left: none !important;
+        border-right: none !important;
+        padding: 1.25rem 1.15rem calc(1.5rem + env(safe-area-inset-bottom, 16px)) !important;
+        max-height: 85vh;
+        animation: sheetSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    .modal-sheet::before {
+        content: '';
+        display: block;
+        width: 38px;
+        height: 4px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.22);
+        margin: -0.25rem auto 1rem;
+    }
+
+    [data-theme="light"] .modal-sheet::before {
+        background: rgba(0, 0, 0, 0.15);
+    }
+
+    .toast-hub {
+        top: calc(0.5rem + env(safe-area-inset-top, 0px));
+        left: 0.75rem;
+        right: 0.75rem;
+        max-width: none;
+        width: auto;
+    }
+
+    .footer-top {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.25rem;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+        padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 16px));
+    }
+}
+
+@keyframes sheetSlideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0.5;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Mobile Search Bar & Compact Actions (<= 480px) */
+@media (max-width: 480px) {
+    .btn-primary-search {
+        width: 38px;
+        height: 38px;
+        padding: 0;
+        justify-content: center;
+        border-radius: var(--radius-sm);
+        flex-shrink: 0;
+    }
+
+    .btn-primary-search span {
+        display: none;
+    }
+
+    .btn-primary-search i {
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    .search-text-field {
+        font-size: 0.9rem;
+    }
+}
+
+/* Ultra-compact screens (320px - 360px) */
+@media (max-width: 360px) {
+    .brand-title {
+        font-size: 1.05rem;
+    }
+
+    .brand-tag {
+        display: none;
+    }
+
+    .header-right {
+        gap: 0.35rem;
+    }
+
+    .unit-btn {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.7rem;
+    }
+
+    .btn-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 0.8rem;
+    }
+
+    .temp-huge-num {
+        font-size: 3.2rem;
+    }
+}
